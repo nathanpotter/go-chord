@@ -1,7 +1,7 @@
 # go-chord
 Chord peer-to-peer distributed hash table protocol implemented in Go
 
-[Wikipedia page explaining the chord protocol]https://en.wikipedia.org/wiki/Chord_(peer-to-peer)
+[Wikipedia page explaining the chord protocol](https://en.wikipedia.org/wiki/Chord_(peer-to-peer))
 
 This project is primarily for me to learn how to build distributed systems using the Go programming language.
 
