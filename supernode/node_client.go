@@ -21,7 +21,15 @@ func NewNodeClient(dsn string, timeout time.Duration) (*NodeClient, error) {
 }
 
 func (c *NodeClient) Join(ip string, port int) (*NodeList, error) {
-    var node *Node
-    err := c.connection.Call("SuperNode.GetNode", nil, &node)
-    return node, err
+    node := &Node{ip: ip, port: port}
+    var nodes *NodeList
+    err := c.connection.Call("SuperNode.Join", node, &nodes)
+    return nodes, err
+}
+
+func (c *NodeClient) PostJoin(ip string, port int) (bool, error) {
+    var added bool
+    node := &Node{ip: ip, port: port}
+    err := c.connection.Call("SuperNode.PostJoin", node, &added)
+    return added, err
 }

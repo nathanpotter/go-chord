@@ -23,5 +23,8 @@ func NewClient(dsn string, timeout time.Duration) (*Client, error) {
 func (c *Client) GetNode() (*node.Client, error) {
     var node *Node
     err := c.connection.Call("SuperNode.GetNode", nil, &node)
+    
+    //TODO: turn node into *node.Client
+    
     return node, err
 }
