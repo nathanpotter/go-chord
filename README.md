@@ -10,3 +10,8 @@ This project is primarily for me to learn how to build distributed systems using
 2. Implement simple file system for writing to different nodes
 3. Create Dockerfiles and docker-compose to ease deployment / dev environment
 4. Build a cli for writing and reading files from the system
+
+To compile proto files:
+protoc -I supernode/ supernode/supernode.proto --go_out=plugins=grpc:supernode
+
+protoc -I node/ node/node.proto --go_out=plugins=grpc:node
