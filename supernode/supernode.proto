@@ -22,7 +22,7 @@ message Empty {}
 
 message NodeInfo {
   string ip = 1;
-  int32 port = 2;
+  string port = 2;
 }
 
 message JoinRequest {
@@ -31,6 +31,7 @@ message JoinRequest {
 
 message JoinResponse {
   repeated NodeInfo nodes = 1;
+  optional bool busy = 2;
 }
 
 message PostJoinRequest {
