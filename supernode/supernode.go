@@ -1,4 +1,4 @@
-package main
+package supernode
 
 import (
   "log"
@@ -56,7 +56,7 @@ func (s *supernode) PostJoin(ctx context.Context, req *pb.PostJoinRequest) (*pb.
 }
 
 func (s *supernode) GetNode(ctx context.Context, req *pb.Empty) (*pb.NodeResponse, error) {
-  
+
 }
 
 func (s *supernode) busyWith(node *pb.NodeInfo) bool {
