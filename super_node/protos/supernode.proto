@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package proto;
+
+service Supernode {
+
+  rpc Join(Node) returns (Nodes) {}
+
+  rpc PostJoin(Node) returns (Empty) {}
+
+  rpc GetNode(Empty) returns (Node) {}
+
+}
+
+message Node {
+  string Ip = 1;
+  string Port = 2;
+}
+
+message Nodes {
+  repeated Node nodes = 1;
+}
+
+message Empty {}
