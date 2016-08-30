@@ -28,5 +28,9 @@ RUN go get google.golang.org/grpc
 # Install protoc-gen-go
 RUN go get github.com/golang/protobuf/protoc-gen-go
 
+# Get local files
+# Change to go get later...
+ADD . /go/src/github.com/nathanpotter/go-chord/super_node
+
 # Build the gRPC file
-RUN ls src/github.com && src/protoc -I protos/ protos/supernode.proto --go_out=plugins=grpc:protos
+RUN protoc -I /go/src/github.com/nathanpotter/go-chord/super_node/protos/ /go/src/github.com/nathanpotter/go-chord/super_node/protos/supernode.proto --go_out=plugins=grpc:/go/src/github.com/nathanpotter/go-chord/super_node/protos
