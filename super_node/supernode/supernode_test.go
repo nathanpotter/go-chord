@@ -14,4 +14,7 @@ func TestNewSupernode(t *testing.T) {
   if s == nil {
     t.Fatalf("Supernode unable to be created.")
   }
+  if s.nodes == nil {
+    t.Errorf("Nodes slice not initialized in supernode")
+  }
 }
