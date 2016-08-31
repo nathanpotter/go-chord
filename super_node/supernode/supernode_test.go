@@ -19,13 +19,19 @@ func TestNewSupernode(t *testing.T) {
 	if s.nodes == nil {
 		t.Fatalf("Nodes slice not initialized in supernode")
 	}
+	if s.nodes.Nodes == nil {
+		t.Fatalf("Nodes inside pb.Nodes not initialized in supernode")
+	}
 }
 
 func TestJoin(t *testing.T) {
 	node := &pb.Node{Ip: "localhost", Port: ":50001"}
-  
-	_, err := s.Join(nil, node)
+
+	nodes, err := s.Join(nil, node)
 	if err != nil {
 		t.Errorf("Error joining supernode:", err)
+	}
+	if len(nodes.Nodes) == 0 {
+		t.Errorf("Node not added to supernodes's node list")
 	}
 }
