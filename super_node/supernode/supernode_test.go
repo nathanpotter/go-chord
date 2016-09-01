@@ -2,8 +2,6 @@ package supernode
 
 import (
 	"testing"
-	"crypto/sha1"
-	"bytes"
 
   "github.com/golang/protobuf/proto"
 	pb "github.com/nathanpotter/go-chord/super_node/protos"
@@ -119,23 +117,20 @@ func TestBuildId(t *testing.T) {
 		t.Errorf("Should return nil node when trying to build Id from nil node")
 	}
 
-	data := []byte("localhost:50001")
-	byteArr := sha1.Sum(data)
-	result := byteArr[:]
 
 	n, err = buildId(&pb.Node{Ip:"localhost", Port:":50001"})
 	if err != nil {
 		t.Errorf("Should not receive error when building Id from valid node")
 	}
-	if !bytes.Equal(n.Id, result) {
-		t.Errorf("Should have same Id between sha1.Sum and node")
+	if n.Id != 18 {
+		t.Errorf("Id should be 18 after going through buildId")
 	}
 	// Node with incorrect Port format, add ':' to beginning and hash
 	n, err = buildId(&pb.Node{Ip:"localhost", Port:"50001"})
 	if err != nil {
 		t.Errorf("Should not receive error when building Id from valid node")
 	}
-	if !bytes.Equal(n.Id, result) {
+	if n.Id != 18 {
 		t.Errorf("Should have same Id between sha1.Sum and node")
 	}
 }

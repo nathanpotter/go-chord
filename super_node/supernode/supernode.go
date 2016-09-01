@@ -11,11 +11,20 @@ import (
   "math/rand"
 	"crypto/sha1"
 	"strings"
+	"bytes"
+	"encoding/binary"
 
   "golang.org/x/net/context"
 
 	pb "github.com/nathanpotter/go-chord/super_node/protos"
   "github.com/golang/protobuf/proto"
+)
+
+const (
+	// m represents the size of the hash space, 2^m
+	m = 6
+	// hashSpace represents the size of the hash space for the nodes in the system
+	hashSpace = 2 << (m-1)
 )
 
 var (
@@ -100,6 +109,20 @@ func buildId(node *pb.Node) (*pb.Node, error) {
 		node.Port = ":" + node.Port
 	}
 	byteArr := sha1.Sum([]byte(node.Ip + node.Port))
-	node.Id = byteArr[:]
+	result, err := putInHashSpace(byteArr[:])
+	if err != nil {
+		return nil, err
+	}
+
+	node.Id = result
 	return node, nil
+}
+
+func putInHashSpace(b []byte) (uint64, error) {
+	bReader := bytes.NewReader(b)
+	result, err := binary.ReadUvarint(bReader)
+	if err != nil {
+		return 0, err
+	}
+	return result % hashSpace, nil
 }
