@@ -9,6 +9,8 @@ import (
 	"errors"
 	"sync"
   "math/rand"
+	"crypto/sha1"
+	"strings"
 
   "golang.org/x/net/context"
 
@@ -20,6 +22,7 @@ var (
 	NoNodesError = errors.New("There are no nodes in the system currently")
 	BusyError    = errors.New("Busy connecting a node to the system")
   WrongNodeError = errors.New("Incorrect node calling PostJoin")
+	NilNodeError = errors.New("Invalid formatting, Nil node values")
 )
 
 // type supernode represents the supernode in our system and holds all required state.
@@ -58,6 +61,10 @@ func (s *supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) 
 	if s.busyWith != nil {
 		return nil, BusyError
 	}
+	node, err = buildId(node)
+	if err != nil {
+		return nil, err
+	}
 
 	s.nodes.Nodes = append(s.nodes.Nodes, node)
 	s.busyWith = node
@@ -83,4 +90,16 @@ func (s *supernode) getRandomNode() (*pb.Node, error) {
   }
   randNode := s.nodes.Nodes[rand.Intn(len(s.nodes.Nodes))]
   return randNode, nil
+}
+
+func buildId(node *pb.Node) (*pb.Node, error) {
+	if node.Ip == "" || node.Port == "" {
+		return nil, NilNodeError
+	}
+	if !strings.HasPrefix(node.Port, ":") {
+		node.Port = ":" + node.Port
+	}
+	byteArr := sha1.Sum([]byte(node.Ip + node.Port))
+	node.Id = byteArr[:]
+	return node, nil
 }

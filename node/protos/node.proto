@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package protos
+
+service node {
+  rpc Write(File) returns (Empty) {}
+
+  rpc Read(File) returns (File) {}
+
+  rpc UpdateDHT(Nodes) returns (Empty) {}
+}
+
+message File {
+  string Name = 1;
+  bytes Contents = 2;
+}
+
+message Nodes {
+  message Node {
+    string Ip = 1;
+    string Port = 2;
+    bytes Id = 3;
+  }
+  repeated Node nodes = 1;
+}
+
+message Empty {}

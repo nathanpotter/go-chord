@@ -15,6 +15,7 @@ service Supernode {
 message Node {
   string Ip = 1;
   string Port = 2;
+  bytes Id = 3;
 }
 
 message Nodes {

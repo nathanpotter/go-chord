@@ -2,6 +2,8 @@ package supernode
 
 import (
 	"testing"
+	"crypto/sha1"
+	"bytes"
 
   "github.com/golang/protobuf/proto"
 	pb "github.com/nathanpotter/go-chord/super_node/protos"
@@ -106,4 +108,34 @@ func TestGetRandomNode(t *testing.T) {
   if !proto.Equal(n, node) {
     t.Errorf("Should receive valid node from GetNode")
   }
+}
+
+func TestBuildId(t *testing.T) {
+	n, err := buildId(&pb.Node{})
+	if err == nil {
+		t.Errorf("Should return error when trying to build Id from nil Node")
+	}
+	if n != nil {
+		t.Errorf("Should return nil node when trying to build Id from nil node")
+	}
+
+	data := []byte("localhost:50001")
+	byteArr := sha1.Sum(data)
+	result := byteArr[:]
+
+	n, err = buildId(&pb.Node{Ip:"localhost", Port:":50001"})
+	if err != nil {
+		t.Errorf("Should not receive error when building Id from valid node")
+	}
+	if !bytes.Equal(n.Id, result) {
+		t.Errorf("Should have same Id between sha1.Sum and node")
+	}
+	// Node with incorrect Port format, add ':' to beginning and hash
+	n, err = buildId(&pb.Node{Ip:"localhost", Port:"50001"})
+	if err != nil {
+		t.Errorf("Should not receive error when building Id from valid node")
+	}
+	if !bytes.Equal(n.Id, result) {
+		t.Errorf("Should have same Id between sha1.Sum and node")
+	}
 }
