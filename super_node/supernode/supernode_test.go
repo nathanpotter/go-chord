@@ -29,11 +29,21 @@ func TestNewSupernode(t *testing.T) {
 func TestColdGet(t *testing.T) {
 	n, err := s.GetNode(nil, nil)
 	if err == nil {
-		t.Errorf("Should receive NoNodesError from GetNode when there are no nodes are in the system")
+		t.Errorf("Should receive NoNodesError from GetNode when there are no nodes in the system")
 	}
 	if n != nil {
 		t.Errorf("Should return nil node when no nodes are in the system")
 	}
+}
+
+func TestColdGetRandomNode(t *testing.T) {
+  n, err := s.getRandomNode()
+  if err == nil {
+    t.Errorf("Should receive NoNodesError from getRandomNode when there are no nodes in the system")
+  }
+  if n != nil {
+    t.Errorf("Should return nil node when no nodes are in the system")
+  }
 }
 
 func TestJoin(t *testing.T) {
@@ -80,6 +90,17 @@ func TestWarmGetNode(t *testing.T) {
   n, err := s.GetNode(nil, nil)
   if err != nil {
     t.Errorf("Should not have error when calling GetNode and there is a node in the system")
+  }
+  // only 1 node in system, n should be equal to node
+  if !proto.Equal(n, node) {
+    t.Errorf("Should receive valid node from GetNode")
+  }
+}
+
+func TestGetRandomNode(t *testing.T) {
+  n, err := s.getRandomNode()
+  if err != nil {
+    t.Errorf("Should not receive error when there is a node in the system")
   }
   // only 1 node in system, n should be equal to node
   if !proto.Equal(n, node) {
