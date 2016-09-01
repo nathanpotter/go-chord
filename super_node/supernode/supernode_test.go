@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	s   *supernode
-	err error
+	s    *supernode
+	node *pb.Node
+	err  error
 )
 
 func TestNewSupernode(t *testing.T) {
@@ -24,8 +25,18 @@ func TestNewSupernode(t *testing.T) {
 	}
 }
 
+func TestColdGet(t *testing.T) {
+	n, err := s.GetNode(nil, nil)
+	if err == nil {
+		t.Errorf("Should receive NoNodesError from GetNode when there are no nodes are in the system")
+	}
+	if n != nil {
+		t.Errorf("Should return nil node when no nodes are in the system")
+	}
+}
+
 func TestJoin(t *testing.T) {
-	node := &pb.Node{Ip: "localhost", Port: ":50001"}
+	node = &pb.Node{Ip: "localhost", Port: ":50001"}
 
 	nodes, err := s.Join(nil, node)
 	if err != nil {
@@ -34,4 +45,25 @@ func TestJoin(t *testing.T) {
 	if len(nodes.Nodes) == 0 {
 		t.Errorf("Node not added to supernodes's node list")
 	}
+}
+
+func TestMultiJoin(t *testing.T) {
+	otherNode := &pb.Node{Ip: "localhost", Port: ":10000"}
+
+	nodes, err := s.Join(nil, otherNode)
+	if err == nil {
+		t.Errorf("Should receive busy error when trying to join system")
+	}
+  if nodes != nil {
+    t.Errorf("Nodes should be nil when supernode is busy")
+  }
+}
+
+func TestNotSamePostJoin(t *testing.T) {
+  wrongNode := &pb.Node{Ip: "badIpAddress", Port: ":5050"}
+
+  _, err = s.PostJoin(nil, wrongNode)
+  if err == nil {
+    t.Errorf("Should receive WrongNodeError when calling PostJoin with incorrect node")
+  }
 }
