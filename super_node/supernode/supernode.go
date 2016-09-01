@@ -8,6 +8,7 @@ package supernode
 import (
 	"errors"
 	"sync"
+  "math/rand"
 
   "golang.org/x/net/context"
 
@@ -47,7 +48,7 @@ func (s *supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, err
 	}
 
 	// return random node
-	return nil, nil
+	return s.getRandomNode()
 }
 
 func (s *supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) {
@@ -72,5 +73,14 @@ func (s *supernode) PostJoin(ctx context.Context, node *pb.Node) (*pb.Empty, err
     return nil, WrongNodeError
   }
 
+  s.busyWith = nil
   return nil, nil
+}
+
+func (s *supernode) getRandomNode() (*pb.Node, error) {
+  if len(s.nodes.Nodes) == 0 {
+    return nil, NoNodesError
+  }
+  randNode := s.nodes.Nodes[rand.Intn(len(s.nodes.Nodes))]
+  return randNode, nil
 }

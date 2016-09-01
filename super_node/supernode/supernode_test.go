@@ -3,6 +3,7 @@ package supernode
 import (
 	"testing"
 
+  "github.com/golang/protobuf/proto"
 	pb "github.com/nathanpotter/go-chord/super_node/protos"
 )
 
@@ -65,5 +66,23 @@ func TestNotSamePostJoin(t *testing.T) {
   _, err = s.PostJoin(nil, wrongNode)
   if err == nil {
     t.Errorf("Should receive WrongNodeError when calling PostJoin with incorrect node")
+  }
+}
+
+func TestGoodPostJoin(t *testing.T) {
+  _, err = s.PostJoin(nil, node)
+  if err != nil {
+    t.Errorf("Should not have error when calling PostJoin with correct node")
+  }
+}
+
+func TestWarmGetNode(t *testing.T) {
+  n, err := s.GetNode(nil, nil)
+  if err != nil {
+    t.Errorf("Should not have error when calling GetNode and there is a node in the system")
+  }
+  // only 1 node in system, n should be equal to node
+  if !proto.Equal(n, node) {
+    t.Errorf("Should receive valid node from GetNode")
   }
 }
