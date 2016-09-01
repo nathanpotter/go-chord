@@ -9,9 +9,11 @@ import (
 )
 
 type node struct {
-  id []byte
+  this *pb.Nodes_Node
 }
 
 func NewNode() *node {
-  return &node{}
+  return &node{
+    this: &pb.Nodes_Node{},
+  }
 }
