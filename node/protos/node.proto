@@ -19,7 +19,7 @@ message Nodes {
   message Node {
     string Ip = 1;
     string Port = 2;
-    bytes Id = 3;
+    uint64 Id = 3;
   }
   repeated Node nodes = 1;
 }
