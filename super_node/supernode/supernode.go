@@ -58,6 +58,10 @@ func (s *supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, err
 	if len(s.nodes.Nodes) == 0 {
 		return nil, NoNodesError
 	}
+	// supernode is busy
+	if s.busyWith != nil {
+		return nil, BusyError
+	}
 
 	// return random node
 	return s.getRandomNode()
@@ -66,6 +70,7 @@ func (s *supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, err
 func (s *supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
+	// TODO: make sure < 2^m nodes
 
 	if s.busyWith != nil {
 		return nil, BusyError
@@ -74,6 +79,7 @@ func (s *supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) 
 	if err != nil {
 		return nil, err
 	}
+	// TODO: validate uniqueness
 
 	s.nodes.Nodes = append(s.nodes.Nodes, node)
 	s.busyWith = node

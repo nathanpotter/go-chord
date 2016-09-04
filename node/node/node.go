@@ -25,6 +25,7 @@ const (
 type node struct {
 	this    *pb.Nodes_Node
 	fingers []*pb.Nodes_Node
+  mtx      *sync.Mutex
 }
 
 func NewNode(ip, port string) *node {
@@ -38,6 +39,9 @@ func NewNode(ip, port string) *node {
 }
 
 func (n *node) findMyNode(nodes *pb.Nodes) *pb.Nodes_Node {
+  n.mtx.Lock()
+  defer n.mtx.Unlock()
+
 	for _, node := range nodes.Nodes {
 		if node.Ip == n.this.Ip && node.Port == n.this.Port {
 			return node
@@ -58,6 +62,10 @@ func (n *node) updateDHT(nodes *pb.Nodes) error {
 	if nodes == nil || nodes.Nodes == nil {
 		return NilNodesError
 	}
+
+  n.mtx.Lock()
+  defer n.mtx.Unlock()
+
   for i := 0; i<m; i++ {
     var val uint64
     if i == 0 {
@@ -102,4 +110,16 @@ func findSuccessor(id uint64, nodes *pb.Nodes) (*pb.Nodes_Node, error) {
     return min, nil
   }
 	return n, nil
+}
+
+func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
+  n.mtx.Lock()
+  defer n.mtx.Unlock()
+  return nil, nil
+}
+
+func (n *node) Read(ctx context.Context, file *pb.File) (*pb.File, error) {
+  n.mtx.Lock()
+  defer n.mtx.Unlock()
+  return nil, nil
 }

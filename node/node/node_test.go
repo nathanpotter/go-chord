@@ -125,5 +125,8 @@ func TestFindSuccessor(t *testing.T) {
 	if !proto.Equal(node, nodes.Nodes[0]) {
 		t.Errorf("n should equal nodes.Nodes[0] when id = 60")
 	}
+}
 
+func TestWrite(t *testing.T) {
+  
 }
