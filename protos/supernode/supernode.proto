@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package supernode;
+
+import "common/common.proto";
+
+service Supernode {
+
+  rpc Join(common.Node) returns (common.Nodes) {}
+
+  rpc PostJoin(common.Node) returns (common.Empty) {}
+
+  rpc GetNode(common.Empty) returns (common.Node) {}
+
+}

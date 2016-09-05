@@ -4,11 +4,11 @@ import (
 	"testing"
 
   "github.com/golang/protobuf/proto"
-	pb "github.com/nathanpotter/go-chord/super_node/protos"
+	pb "github.com/nathanpotter/go-chord/protos/common"
 )
 
 var (
-	s    *supernode
+	s    *Supernode
 	node *pb.Node
 	err  error
 )
@@ -53,7 +53,10 @@ func TestJoin(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error joining supernode:", err)
 	}
-	if len(nodes.Nodes) == 0 {
+	if len(s.nodes.Nodes) !=  1 {
+		t.Errorf("Node not added to supernodes's node list")
+	}
+	if len(nodes.Nodes) != 1 {
 		t.Errorf("Node not added to supernodes's node list")
 	}
 }
@@ -65,8 +68,8 @@ func TestMultiJoin(t *testing.T) {
 	if err == nil {
 		t.Errorf("Should receive busy error when trying to join system")
 	}
-  if nodes != nil {
-    t.Errorf("Nodes should be nil when supernode is busy")
+  if !proto.Equal(nodes, &pb.Nodes{}) {
+    t.Errorf("Nodes should be empty when supernode is busy")
   }
 }
 

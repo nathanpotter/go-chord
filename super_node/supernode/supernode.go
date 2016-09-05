@@ -1,5 +1,5 @@
-// package supernode holds all the logic for the supernode service in our system.
-// The supernode is responsible for maintaining a list of nodes in the system.
+// package Supernode holds all the logic for the Supernode service in our system.
+// The Supernode is responsible for maintaining a list of nodes in the system.
 // It handles joining and connecting to the system. It also gives a random node
 // to a client in order to read and write from the system.
 
@@ -7,6 +7,7 @@ package supernode
 
 import (
 	"errors"
+	"log"
 	"sync"
   "math/rand"
 	"crypto/sha1"
@@ -16,7 +17,7 @@ import (
 
   "golang.org/x/net/context"
 
-	pb "github.com/nathanpotter/go-chord/super_node/protos"
+	pb "github.com/nathanpotter/go-chord/protos/common"
   "github.com/golang/protobuf/proto"
 )
 
@@ -34,23 +35,23 @@ var (
 	NilNodeError = errors.New("Invalid formatting, Nil node values")
 )
 
-// type supernode represents the supernode in our system and holds all required state.
+// type Supernode represents the Supernode in our system and holds all required state.
 // Concurrent access to the data through the use of a mutex.
-type supernode struct {
+type Supernode struct {
 	nodes    *pb.Nodes
 	mtx      *sync.Mutex
 	busyWith *pb.Node
 }
 
-func NewSupernode() *supernode {
-	return &supernode{
+func NewSupernode() *Supernode {
+	return &Supernode{
 		nodes: &pb.Nodes{Nodes: make([]*pb.Node, 0, 10)},
 		mtx:   &sync.Mutex{},
 	}
 }
 
-// Returns a random node from the supernode nodes list for a client to call Read/Write on
-func (s *supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, error) {
+// Returns a random node from the Supernode nodes list for a client to call Read/Write on
+func (s *Supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, error) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
@@ -58,7 +59,7 @@ func (s *supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, err
 	if len(s.nodes.Nodes) == 0 {
 		return nil, NoNodesError
 	}
-	// supernode is busy
+	// Supernode is busy
 	if s.busyWith != nil {
 		return nil, BusyError
 	}
@@ -67,17 +68,18 @@ func (s *supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, err
 	return s.getRandomNode()
 }
 
-func (s *supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) {
+func (s *Supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 	// TODO: make sure < 2^m nodes
+	log.Println("Join request", node)
 
 	if s.busyWith != nil {
-		return nil, BusyError
+		return &pb.Nodes{}, BusyError
 	}
-	node, err = buildId(node)
+	node, err := buildId(node)
 	if err != nil {
-		return nil, err
+		return &pb.Nodes{}, err
 	}
 	// TODO: validate uniqueness
 
@@ -87,19 +89,20 @@ func (s *supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) 
 	return s.nodes, nil
 }
 
-func (s *supernode) PostJoin(ctx context.Context, node *pb.Node) (*pb.Empty, error) {
+func (s *Supernode) PostJoin(ctx context.Context, node *pb.Node) (*pb.Empty, error) {
   s.mtx.Lock()
   defer s.mtx.Unlock()
+	log.Println("PostJoin request", node)
 
   if !proto.Equal(node, s.busyWith) {
-    return nil, WrongNodeError
+    return &pb.Empty{}, WrongNodeError
   }
 
   s.busyWith = nil
-  return nil, nil
+  return &pb.Empty{}, nil
 }
 
-func (s *supernode) getRandomNode() (*pb.Node, error) {
+func (s *Supernode) getRandomNode() (*pb.Node, error) {
   if len(s.nodes.Nodes) == 0 {
     return nil, NoNodesError
   }

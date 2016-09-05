@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package node;
+
+import "common/common.proto";
+
+service node {
+  rpc Write(common.File) returns (common.Empty) {}
+
+  rpc Read(common.File) returns (common.File) {}
+
+  rpc UpdateDHT(common.Nodes) returns (common.Empty) {}
+}

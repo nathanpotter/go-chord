@@ -4,18 +4,18 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	pb "github.com/nathanpotter/go-chord/node/protos"
+	pb "github.com/nathanpotter/go-chord/protos/common"
 )
 
 var (
-	n     *node
+	n     *Node
 	nodes = &pb.Nodes{
-		Nodes: []*pb.Nodes_Node{
-			&pb.Nodes_Node{Ip: "192.76.91.5", Port: ":9000", Id: 3},
-			&pb.Nodes_Node{Ip: "127.0.0.1", Port: ":5050", Id: 28},
-			&pb.Nodes_Node{Ip: "176.80.20.18", Port: ":9090", Id: 41},
-			&pb.Nodes_Node{Ip: "176.58.21.37", Port: ":8000", Id: 19},
-			&pb.Nodes_Node{Ip: "192.54.38.76", Port: ":6000", Id: 56},
+		Nodes: []*pb.Node{
+			&pb.Node{Ip: "192.76.91.5", Port: ":9000", Id: 3},
+			&pb.Node{Ip: "127.0.0.1", Port: ":5050", Id: 28},
+			&pb.Node{Ip: "176.80.20.18", Port: ":9090", Id: 41},
+			&pb.Node{Ip: "176.58.21.37", Port: ":8000", Id: 19},
+			&pb.Node{Ip: "192.54.38.76", Port: ":6000", Id: 56},
 		},
 	}
 )
@@ -37,7 +37,10 @@ func TestFindMyNode(t *testing.T) {
 
 	ns := nodes.GetNodes()
 	myNode := ns[1]
-	n.this = n.findMyNode(nodes)
+	err := n.findMyNode(nodes)
+  if err != nil {
+    t.Errorf("Should not receive error for findMyNode when valid argument")
+  }
 	if !proto.Equal(n.this, myNode) {
 		t.Errorf("Should replace n.this with correct node which has Id", n.this, myNode)
 	}
@@ -87,8 +90,8 @@ func TestFindSuccessor(t *testing.T) {
 	if err == nil {
 		t.Errorf("Should receive error from nil nodes argument")
 	}
-	if node != nil {
-		t.Errorf("Should receive nil node when nodes argument is nil")
+	if !proto.Equal(node, &pb.Node{}) {
+		t.Errorf("Should receive empty node when nodes argument is nil")
 	}
 
 	node, err = findSuccessor(0, nodes)
@@ -128,5 +131,5 @@ func TestFindSuccessor(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-  
+
 }

@@ -1,15 +1,10 @@
 syntax = "proto3";
 
-package protos;
+package common;
 
-service Supernode {
-
-  rpc Join(Node) returns (Nodes) {}
-
-  rpc PostJoin(Node) returns (Empty) {}
-
-  rpc GetNode(Empty) returns (Node) {}
-
+message File {
+  string Name = 1;
+  bytes Contents = 2;
 }
 
 message Node {
