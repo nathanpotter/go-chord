@@ -50,6 +50,31 @@ func TestFindMyNode(t *testing.T) {
 	}
 }
 
+func TestFindMyPredecessor(t *testing.T) {
+	err := n.findMyPredecessor(&pb.Nodes{})
+	if err == nil {
+		t.Errorf("Should receive NodeNotFoundError")
+	}
+	err = n.findMyPredecessor(nodes)
+	if err != nil {
+		t.Errorf("Should not have error from valid argument")
+	}
+	if n.predecessor != nodes.Nodes[3] {
+		t.Errorf("Should have found correct predecessor")
+	}
+}
+
+func TestFindMax(t *testing.T) {
+	node := findMax(&pb.Nodes{})
+	if node != nil {
+		t.Errorf("Max node should be nil when there are no nodes")
+	}
+	node = findMax(nodes)
+	if node != nodes.Nodes[4] {
+		t.Errorf("findMax does not return correct node, got: %v, expected: %v", node, nodes.Nodes[4])
+	}
+}
+
 func TestNilNodesUpdateDHT(t *testing.T) {
 	// UpdateDHT
 	_, err := n.UpdateDHT(nil, nil)
@@ -98,7 +123,7 @@ func TestFindSuccessor(t *testing.T) {
 		t.Errorf("Should receive empty node when nodes argument is nil")
 	}
 
-	node, err = findSuccessor(0, nodes)
+	node, err = findSuccessor(0, nodes.Nodes)
 	if err != nil {
 		t.Errorf("Shouldn't receive error from valid findSuccessor call")
 	}
@@ -109,7 +134,7 @@ func TestFindSuccessor(t *testing.T) {
 		t.Errorf("n should equal nodes.Nodes[0] when id = 0")
 	}
 
-	node, err = findSuccessor(3, nodes)
+	node, err = findSuccessor(3, nodes.Nodes)
 	if err != nil {
 		t.Errorf("Shouldn't receive error from valid findSuccessor call")
 	}
@@ -117,7 +142,7 @@ func TestFindSuccessor(t *testing.T) {
 		t.Errorf("n should equal nodes.Nodes[3] when id = 3")
 	}
 
-	node, err = findSuccessor(25, nodes)
+	node, err = findSuccessor(25, nodes.Nodes)
 	if err != nil {
 		t.Errorf("Shouldn't receive error from valid findSuccessor call")
 	}
@@ -125,7 +150,7 @@ func TestFindSuccessor(t *testing.T) {
 		t.Errorf("n should equal nodes.Nodes[1] when id = 25")
 	}
 
-	node, err = findSuccessor(60, nodes)
+	node, err = findSuccessor(60, nodes.Nodes)
 	if err != nil {
 		t.Errorf("Shouldn't receive error from valid findSuccessor call")
 	}
@@ -137,17 +162,17 @@ func TestFindSuccessor(t *testing.T) {
 func TestWrite(t *testing.T) {
 	file := &pb.File{Name: "Test", Contents: []byte("This is a test file")}
 
-	err := n.write(nil)
+	_, err := n.write(nil)
 	if err == nil {
 		t.Errorf("Should receive error when using nil as argument")
 	}
 
-	err = n.write(&pb.File{})
+	_, err = n.write(&pb.File{})
 	if err == nil {
 		t.Errorf("Should receive error when file argument doesn't have name")
 	}
 
-	err = n.write(file)
+	_, err = n.write(file)
 	if err != nil {
 		t.Errorf("Should not receive error when writing valid file")
 	}
@@ -177,7 +202,7 @@ func TestRead(t *testing.T) {
 	file := &pb.File{Name: "Test2", Contents: []byte("This is a second test file")}
 	nameOnly := &pb.File{Name: "Test2"}
 
-	err := n.write(file)
+	_, err := n.write(file)
 	if err != nil {
 		t.Errorf("Should not receive error from writing valid file")
 	}
@@ -203,6 +228,25 @@ func TestRead(t *testing.T) {
 	}
 	if !proto.Equal(f, file) {
 		t.Errorf("File read from n.read should be equal to file written")
+	}
+}
+
+func TestMyFile(t *testing.T) {
+	ok := n.myFile(29)
+	if ok {
+		t.Errorf("val should be false when id is > n.this.Id")
+	}
+	ok = n.myFile(28)
+	if !ok {
+		t.Errorf("val should be true when id is == n.this.Id")
+	}
+	ok = n.myFile(41)
+	if ok {
+		t.Errorf("val should be false when id is not <= n.this.Id and > n.predecessor.Id")
+	}
+	ok = n.myFile(20)
+	if !ok {
+		t.Errorf("val should be true when id is not <= n.this.Id and id > n.predecessor.ID")
 	}
 }
 

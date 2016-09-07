@@ -8,7 +8,6 @@ import (
 
 	"github.com/nathanpotter/go-chord/node/node"
 	"google.golang.org/grpc"
-	//pb "github.com/nathanpotter/go-chord/protos/common"
 	npb "github.com/nathanpotter/go-chord/protos/node"
 )
 
