@@ -6,33 +6,33 @@
 package supernode
 
 import (
+	"bytes"
+	"crypto/sha1"
+	"encoding/binary"
 	"errors"
 	"log"
-	"sync"
-  "math/rand"
-	"crypto/sha1"
+	"math/rand"
 	"strings"
-	"bytes"
-	"encoding/binary"
+	"sync"
 
-  "golang.org/x/net/context"
+	"golang.org/x/net/context"
 
+	"github.com/golang/protobuf/proto"
 	pb "github.com/nathanpotter/go-chord/protos/common"
-  "github.com/golang/protobuf/proto"
 )
 
 const (
 	// m represents the size of the hash space, 2^m
 	m = 6
 	// hashSpace represents the size of the hash space for the nodes in the system
-	hashSpace = 2 << (m-1)
+	hashSpace = 2 << (m - 1)
 )
 
 var (
-	NoNodesError = errors.New("There are no nodes in the system currently")
-	BusyError    = errors.New("Busy connecting a node to the system")
-  WrongNodeError = errors.New("Incorrect node calling PostJoin")
-	NilNodeError = errors.New("Invalid formatting, Nil node values")
+	NoNodesError   = errors.New("There are no nodes in the system currently")
+	BusyError      = errors.New("Busy connecting a node to the system")
+	WrongNodeError = errors.New("Incorrect node calling PostJoin")
+	NilNodeError   = errors.New("Invalid formatting, Nil node values")
 )
 
 // type Supernode represents the Supernode in our system and holds all required state.
@@ -90,24 +90,24 @@ func (s *Supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) 
 }
 
 func (s *Supernode) PostJoin(ctx context.Context, node *pb.Node) (*pb.Empty, error) {
-  s.mtx.Lock()
-  defer s.mtx.Unlock()
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
 	log.Println("PostJoin request", node)
 
-  if !proto.Equal(node, s.busyWith) {
-    return &pb.Empty{}, WrongNodeError
-  }
+	if !proto.Equal(node, s.busyWith) {
+		return &pb.Empty{}, WrongNodeError
+	}
 
-  s.busyWith = nil
-  return &pb.Empty{}, nil
+	s.busyWith = nil
+	return &pb.Empty{}, nil
 }
 
 func (s *Supernode) getRandomNode() (*pb.Node, error) {
-  if len(s.nodes.Nodes) == 0 {
-    return nil, NoNodesError
-  }
-  randNode := s.nodes.Nodes[rand.Intn(len(s.nodes.Nodes))]
-  return randNode, nil
+	if len(s.nodes.Nodes) == 0 {
+		return nil, NoNodesError
+	}
+	randNode := s.nodes.Nodes[rand.Intn(len(s.nodes.Nodes))]
+	return randNode, nil
 }
 
 func buildId(node *pb.Node) (*pb.Node, error) {

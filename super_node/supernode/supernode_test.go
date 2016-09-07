@@ -3,7 +3,7 @@ package supernode
 import (
 	"testing"
 
-  "github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	pb "github.com/nathanpotter/go-chord/protos/common"
 )
 
@@ -37,13 +37,13 @@ func TestColdGet(t *testing.T) {
 }
 
 func TestColdGetRandomNode(t *testing.T) {
-  n, err := s.getRandomNode()
-  if err == nil {
-    t.Errorf("Should receive NoNodesError from getRandomNode when there are no nodes in the system")
-  }
-  if n != nil {
-    t.Errorf("Should return nil node when no nodes are in the system")
-  }
+	n, err := s.getRandomNode()
+	if err == nil {
+		t.Errorf("Should receive NoNodesError from getRandomNode when there are no nodes in the system")
+	}
+	if n != nil {
+		t.Errorf("Should return nil node when no nodes are in the system")
+	}
 }
 
 func TestJoin(t *testing.T) {
@@ -53,7 +53,7 @@ func TestJoin(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error joining supernode:", err)
 	}
-	if len(s.nodes.Nodes) !=  1 {
+	if len(s.nodes.Nodes) != 1 {
 		t.Errorf("Node not added to supernodes's node list")
 	}
 	if len(nodes.Nodes) != 1 {
@@ -68,47 +68,47 @@ func TestMultiJoin(t *testing.T) {
 	if err == nil {
 		t.Errorf("Should receive busy error when trying to join system")
 	}
-  if !proto.Equal(nodes, &pb.Nodes{}) {
-    t.Errorf("Nodes should be empty when supernode is busy")
-  }
+	if !proto.Equal(nodes, &pb.Nodes{}) {
+		t.Errorf("Nodes should be empty when supernode is busy")
+	}
 }
 
 func TestNotSamePostJoin(t *testing.T) {
-  wrongNode := &pb.Node{Ip: "badIpAddress", Port: ":5050"}
+	wrongNode := &pb.Node{Ip: "badIpAddress", Port: ":5050"}
 
-  _, err = s.PostJoin(nil, wrongNode)
-  if err == nil {
-    t.Errorf("Should receive WrongNodeError when calling PostJoin with incorrect node")
-  }
+	_, err = s.PostJoin(nil, wrongNode)
+	if err == nil {
+		t.Errorf("Should receive WrongNodeError when calling PostJoin with incorrect node")
+	}
 }
 
 func TestGoodPostJoin(t *testing.T) {
-  _, err = s.PostJoin(nil, node)
-  if err != nil {
-    t.Errorf("Should not have error when calling PostJoin with correct node")
-  }
+	_, err = s.PostJoin(nil, node)
+	if err != nil {
+		t.Errorf("Should not have error when calling PostJoin with correct node")
+	}
 }
 
 func TestWarmGetNode(t *testing.T) {
-  n, err := s.GetNode(nil, nil)
-  if err != nil {
-    t.Errorf("Should not have error when calling GetNode and there is a node in the system")
-  }
-  // only 1 node in system, n should be equal to node
-  if !proto.Equal(n, node) {
-    t.Errorf("Should receive valid node from GetNode")
-  }
+	n, err := s.GetNode(nil, nil)
+	if err != nil {
+		t.Errorf("Should not have error when calling GetNode and there is a node in the system")
+	}
+	// only 1 node in system, n should be equal to node
+	if !proto.Equal(n, node) {
+		t.Errorf("Should receive valid node from GetNode")
+	}
 }
 
 func TestGetRandomNode(t *testing.T) {
-  n, err := s.getRandomNode()
-  if err != nil {
-    t.Errorf("Should not receive error when there is a node in the system")
-  }
-  // only 1 node in system, n should be equal to node
-  if !proto.Equal(n, node) {
-    t.Errorf("Should receive valid node from GetNode")
-  }
+	n, err := s.getRandomNode()
+	if err != nil {
+		t.Errorf("Should not receive error when there is a node in the system")
+	}
+	// only 1 node in system, n should be equal to node
+	if !proto.Equal(n, node) {
+		t.Errorf("Should receive valid node from GetNode")
+	}
 }
 
 func TestBuildId(t *testing.T) {
@@ -120,8 +120,7 @@ func TestBuildId(t *testing.T) {
 		t.Errorf("Should return nil node when trying to build Id from nil node")
 	}
 
-
-	n, err = buildId(&pb.Node{Ip:"localhost", Port:":50001"})
+	n, err = buildId(&pb.Node{Ip: "localhost", Port: ":50001"})
 	if err != nil {
 		t.Errorf("Should not receive error when building Id from valid node")
 	}
@@ -129,7 +128,7 @@ func TestBuildId(t *testing.T) {
 		t.Errorf("Id should be 18 after going through buildId")
 	}
 	// Node with incorrect Port format, add ':' to beginning and hash
-	n, err = buildId(&pb.Node{Ip:"localhost", Port:"50001"})
+	n, err = buildId(&pb.Node{Ip: "localhost", Port: "50001"})
 	if err != nil {
 		t.Errorf("Should not receive error when building Id from valid node")
 	}
