@@ -136,3 +136,17 @@ func TestBuildId(t *testing.T) {
 		t.Errorf("Should have same Id between sha1.Sum and node")
 	}
 }
+
+func TestUnique(t *testing.T) {
+	n := &pb.Node{Id: 18}
+	ok := s.unique(n)
+	if ok {
+		t.Errorf("Should receive false since Id: 18 is already in the system")
+	}
+
+	uniqueN := &pb.Node{Id: 20}
+	ok = s.unique(uniqueN)
+	if !ok {
+		t.Errorf("s.unique should not return false when node.Id is unique in the system")
+	}
+}

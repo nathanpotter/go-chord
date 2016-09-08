@@ -33,6 +33,7 @@ var (
 	BusyError      = errors.New("Busy connecting a node to the system")
 	WrongNodeError = errors.New("Incorrect node calling PostJoin")
 	NilNodeError   = errors.New("Invalid formatting, Nil node values")
+	SystemFullError = errors.New("System is full, unable to join")
 )
 
 // type Supernode represents the Supernode in our system and holds all required state.
@@ -71,7 +72,11 @@ func (s *Supernode) GetNode(ctx context.Context, empty *pb.Empty) (*pb.Node, err
 func (s *Supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
-	// TODO: make sure < 2^m nodes
+
+	if len(s.nodes.Nodes) == hashSpace {
+		return &pb.Nodes{}, SystemFullError
+	}
+
 	log.Println("Join request", node)
 
 	if s.busyWith != nil {
@@ -81,7 +86,16 @@ func (s *Supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) 
 	if err != nil {
 		return &pb.Nodes{}, err
 	}
-	// TODO: validate uniqueness
+	ok := s.unique(node)
+	for !ok {
+		log.Println("Node not unique")
+		node.Id++
+		ok = s.unique(node)
+		if ok {
+			log.Println("Node is now unique")
+		}
+	}
+
 
 	s.nodes.Nodes = append(s.nodes.Nodes, node)
 	s.busyWith = node
@@ -134,4 +148,13 @@ func putInHashSpace(b []byte) (uint64, error) {
 		return 0, err
 	}
 	return result % hashSpace, nil
+}
+
+func (s *Supernode) unique(node *pb.Node) bool {
+	for _, n := range s.nodes.Nodes {
+		if n.Id == node.Id {
+			return false
+		}
+	}
+	return true
 }
