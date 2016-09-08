@@ -1,6 +1,8 @@
 # go-chord
 Chord peer-to-peer distributed hash table protocol implemented in Go
 
+[[https://github.com/nathanpotter/go-chord/chord.png|alt=chord]]
+
 [Wikipedia page explaining the chord protocol](https://en.wikipedia.org/wiki/Chord_(peer-to-peer))
 
 ## Chord Entities:
@@ -47,7 +49,6 @@ from the supernode. When a request is made to the node, it hashes the filename,
 checks if the file belongs to the node, if it does then it's read/written. If it
 does not belong to the node, it's forwarded to the closest preceding node in the
 node's finger table recursively.
-
 
 
 ### Things to do:
