@@ -94,7 +94,6 @@ func (n *node) findMyPredecessor(nodes *pb.Nodes) error {
   if n.predecessor == nil {
     return NodeNotFoundError
   }
-  log.Printf("Node: %v, Predecessor: %v\n", n.this, n.predecessor)
   return nil
 }
 
@@ -147,7 +146,7 @@ func (n *node) updateDHT(nodes *pb.Nodes) error {
 		}
 		n.fingers[i] = node
 	}
-  log.Println(n.fingers)
+
 	return nil
 }
 
@@ -200,11 +199,11 @@ func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
 	if err != nil {
 		return &pb.Empty{}, err
 	}
-  log.Printf("File: %s has id: %d", file.Name, id)
+
 
 	// if file is mine, write and return result
 	if n.myFile(id) {
-    log.Printf("Writing file: %v\n", file)
+    log.Printf("Writing file to local filesystem: %v\n", file)
 		return n.write(file)
 	}
 
@@ -256,11 +255,10 @@ func (n *node) Read(ctx context.Context, file *pb.File) (*pb.File, error) {
 	if err != nil {
 		return &pb.File{}, err
 	}
-  log.Printf("File: %s has id: %d", file.Name, id)
 
 	// if file is mine, read and return result
 	if n.myFile(id) {
-    log.Printf("Reading file: %v\n", file)
+    log.Printf("Reading file from local filesystem: %v\n", file)
 		return n.read(file)
 	}
 
@@ -367,25 +365,17 @@ func (n *node) Join(ip string, port string) error {
 	}
 
 	// then call UpdateDHT on other nodes in system
-	// TODO: parallelize this
+	var wg sync.WaitGroup
+
 	for _, node := range nodes.Nodes {
 		if node.Id == n.this.Id {
 			continue
 		}
-		conn, err := grpc.Dial((node.Ip + node.Port), grpc.WithInsecure())
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		defer conn.Close()
-		n := npb.NewNodeClient(conn)
-
-		_, err = n.UpdateDHT(context.Background(), nodes)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
+		wg.Add(1)
+		go sendUpdateDHT(node, nodes, &wg)
 	}
+
+	wg.Wait()
 	// when finished, call PostJoin to supernode
 	_, err = s.PostJoin(context.Background(), n.this)
 	if err != nil {
@@ -416,4 +406,21 @@ func putInHashSpace(b []byte) (uint64, error) {
 		return 0, err
 	}
 	return result % hashSpace, nil
+}
+
+func sendUpdateDHT(node *pb.Node, nodes *pb.Nodes, wg *sync.WaitGroup) {
+
+	defer wg.Done()
+
+	conn, err := grpc.Dial((node.Ip + node.Port), grpc.WithInsecure())
+	if err != nil {
+		log.Println(err)
+	}
+	defer conn.Close()
+	n := npb.NewNodeClient(conn)
+
+	_, err = n.UpdateDHT(context.Background(), nodes)
+	if err != nil {
+		log.Println(err)
+	}
 }
