@@ -187,7 +187,7 @@ func (n *node) closestPredecessor(id uint64) (*pb.Node) {
       return n.fingers[i]
     }
   }
-  return n.fingers[m-1]
+  return n.fingers[0]
 }
 
 func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
@@ -312,8 +312,17 @@ func (n *node) myFile(id uint64) bool {
   if n.this.Id < n.predecessor.Id {
     thisId := n.this.Id + n.predecessor.Id
     newId := id + n.predecessor.Id
-    if newId <= thisId && newId > n.predecessor.Id {
-      return true
+    if id > n.predecessor.Id {
+      if id < thisId {
+        return true
+      }
+      return false
+    }
+    if id < n.this.Id {
+      if newId > n.predecessor.Id {
+        return true
+      }
+      return false
     }
   }
 	if id <= n.this.Id && id > n.predecessor.Id {

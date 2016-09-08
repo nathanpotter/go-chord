@@ -61,11 +61,11 @@ func main() {
   }
 
   file1 := &pb.File{Name: "file1", Contents: []byte("Here are the contents of file1")}
-  file2 := &pb.File{Name: "file2", Contents: []byte("Here is file 2's contents")}
-  file3 := &pb.File{Name: "file3", Contents: []byte("Here is file 3's contents")}
-  file4 := &pb.File{Name: "file4", Contents: []byte("Here is file 4's contents")}
-  file5 := &pb.File{Name: "file5", Contents: []byte("Here is file 5's contents")}
-  file6 := &pb.File{Name: "file6", Contents: []byte("Here is file 6's contents")}
+  file2 := &pb.File{Name: "file2adf", Contents: []byte("Here is file 2's contents")}
+  file3 := &pb.File{Name: "file3kjlk", Contents: []byte("Here is file 3's contents")}
+  file4 := &pb.File{Name: "file4asjflk", Contents: []byte("Here is file 4's contents")}
+  file5 := &pb.File{Name: "file5vkfej", Contents: []byte("Here is file 5's contents")}
+  file6 := &pb.File{Name: "file6ckei", Contents: []byte("Here is file 6's contents")}
 
 
   // test we can read file 1
@@ -111,7 +111,7 @@ func main() {
   }
   log.Printf("\nfile1: %v\nresult: %v\n", file1, result)
 
-  result, err = n.Read(context.Background(), &pb.File{Name: "file6"})
+  result, err = n.Read(context.Background(), &pb.File{Name: "file6ckei"})
   if err != nil {
     log.Println("Error reading file1 from the system:", err)
   }
