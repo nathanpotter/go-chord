@@ -1,7 +1,7 @@
 # go-chord
 Chord peer-to-peer distributed hash table protocol implemented in Go
 
-[[https://github.com/nathanpotter/go-chord/chord.png|alt=chord]]
+![Alt chord](chord.png)
 
 [Wikipedia page explaining the chord protocol](https://en.wikipedia.org/wiki/Chord_(peer-to-peer))
 
