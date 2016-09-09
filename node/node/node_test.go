@@ -263,3 +263,16 @@ func TestHashFilename(t *testing.T) {
 		t.Errorf("Hashed filename should be equal to 3 when hashSpace = 64")
 	}
 }
+
+func TestUpdateFingers(t *testing.T) {
+	err := n.updateFingers(nil)
+	if err == nil {
+		t.Errorf("Should receive error when calling updateFingers with nil nodes")
+	}
+
+	err = n.updateFingers(&pb.Nodes{})
+	if err == nil {
+		t.Errorf("Should receive error when calling updateFingers with empty nodes")
+	}
+
+}

@@ -132,12 +132,24 @@ func (n *node) updateDHT(nodes *pb.Nodes) error {
 		return err
 	}
 
+	err = n.updateFingers(nodes)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (n *node) updateFingers(nodes *pb.Nodes) error {
+	if nodes == nil || nodes.Nodes == nil {
+		return NilNodesError
+	}
 	for i := 0; i < m; i++ {
 		var val uint64
 		if i == 0 {
 			val = ((n.this.Id + 1) % hashSpace)
 		} else {
-			val = ((n.this.Id + (2 << uint64((i - 1)))) % hashSpace)
+			val = ((n.this.Id + (2 << uint64(i-1))) % hashSpace)
 		}
 		node, err := findSuccessor(val, nodes.Nodes)
 		if err != nil {
@@ -145,7 +157,6 @@ func (n *node) updateDHT(nodes *pb.Nodes) error {
 		}
 		n.fingers[i] = node
 	}
-
 	return nil
 }
 
