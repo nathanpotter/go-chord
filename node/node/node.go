@@ -70,45 +70,44 @@ func (n *node) findMyNode(nodes *pb.Nodes) error {
 	return NodeNotFoundError
 }
 
-
 func (n *node) findMyPredecessor(nodes *pb.Nodes) error {
 
-  if (len(nodes.Nodes) == 1) {
-    return nil
-  }
-  n.predecessor = nil
+	if len(nodes.Nodes) == 1 {
+		return nil
+	}
+	n.predecessor = nil
 
-  for _, node := range nodes.Nodes {
-    if node.Id == n.this.Id {
-      continue
-    }
-    if n.predecessor == nil && node.Id < n.this.Id {
-      n.predecessor = node
-    } else if node.Id < n.this.Id && node.Id > n.predecessor.Id {
-      n.predecessor = node
-    }
-  }
-  if n.predecessor == nil {
-    n.predecessor = findMax(nodes)
-  }
-  if n.predecessor == nil {
-    return NodeNotFoundError
-  }
-  return nil
+	for _, node := range nodes.Nodes {
+		if node.Id == n.this.Id {
+			continue
+		}
+		if n.predecessor == nil && node.Id < n.this.Id {
+			n.predecessor = node
+		} else if node.Id < n.this.Id && node.Id > n.predecessor.Id {
+			n.predecessor = node
+		}
+	}
+	if n.predecessor == nil {
+		n.predecessor = findMax(nodes)
+	}
+	if n.predecessor == nil {
+		return NodeNotFoundError
+	}
+	return nil
 }
 
 func findMax(nodes *pb.Nodes) *pb.Node {
-  var max *pb.Node
+	var max *pb.Node
 
-  for _, node := range nodes.Nodes {
-    if max == nil {
-      max = node
-    } else if node.Id > max.Id {
-      max = node
-    }
-  }
+	for _, node := range nodes.Nodes {
+		if max == nil {
+			max = node
+		} else if node.Id > max.Id {
+			max = node
+		}
+	}
 
-  return max
+	return max
 }
 
 func (n *node) UpdateDHT(ctx context.Context, nodes *pb.Nodes) (*pb.Empty, error) {
@@ -128,10 +127,10 @@ func (n *node) updateDHT(nodes *pb.Nodes) error {
 	n.mtx.Lock()
 	defer n.mtx.Unlock()
 
-  err := n.findMyPredecessor(nodes)
-  if err != nil {
-    return err
-  }
+	err := n.findMyPredecessor(nodes)
+	if err != nil {
+		return err
+	}
 
 	for i := 0; i < m; i++ {
 		var val uint64
@@ -180,18 +179,18 @@ func findSuccessor(id uint64, nodes []*pb.Node) (*pb.Node, error) {
 	return n, nil
 }
 
-func (n *node) closestPredecessor(id uint64) (*pb.Node) {
-  for i := (len(n.fingers)-1); i >=0; i-- {
-    if n.fingers[i].Id < id && n.fingers[i].Id > n.this.Id {
-      return n.fingers[i]
-    }
-  }
-  return n.fingers[0]
+func (n *node) closestPredecessor(id uint64) *pb.Node {
+	for i := (len(n.fingers) - 1); i >= 0; i-- {
+		if n.fingers[i].Id < id && n.fingers[i].Id > n.this.Id {
+			return n.fingers[i]
+		}
+	}
+	return n.fingers[0]
 }
 
 func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
 
-  if file == nil || file.Name == "" {
+	if file == nil || file.Name == "" {
 		return &pb.Empty{}, NilFileError
 	}
 	// hash file
@@ -200,18 +199,17 @@ func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
 		return &pb.Empty{}, err
 	}
 
-
 	// if file is mine, write and return result
 	if n.myFile(id) {
-    log.Printf("Writing file to local filesystem: %v\n", file)
+		log.Printf("Writing file to local filesystem: %v\n", file)
 		return n.write(file)
 	}
 
 	// if not, forward to closest predecessor
 	node := n.closestPredecessor(id)
-  if err != nil {
-    return &pb.Empty{}, err
-  }
+	if err != nil {
+		return &pb.Empty{}, err
+	}
 
 	conn, err := grpc.Dial((node.Ip + node.Port), grpc.WithInsecure())
 	if err != nil {
@@ -220,7 +218,7 @@ func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
 	}
 	defer conn.Close()
 	nodeClient := npb.NewNodeClient(conn)
-  log.Printf("Writing: %v, To: %v\n", file,  node)
+	log.Printf("Writing: %v, To: %v\n", file, node)
 	return nodeClient.Write(context.Background(), file)
 }
 
@@ -258,15 +256,15 @@ func (n *node) Read(ctx context.Context, file *pb.File) (*pb.File, error) {
 
 	// if file is mine, read and return result
 	if n.myFile(id) {
-    log.Printf("Reading file from local filesystem: %v\n", file)
+		log.Printf("Reading file from local filesystem: %v\n", file)
 		return n.read(file)
 	}
 
 	// if not, forward to closest predecessor
 	node := n.closestPredecessor(id)
-  if err != nil {
-    return &pb.File{}, err
-  }
+	if err != nil {
+		return &pb.File{}, err
+	}
 
 	conn, err := grpc.Dial((node.Ip + node.Port), grpc.WithInsecure())
 	if err != nil {
@@ -276,7 +274,7 @@ func (n *node) Read(ctx context.Context, file *pb.File) (*pb.File, error) {
 	defer conn.Close()
 	nodeClient := npb.NewNodeClient(conn)
 
-  log.Printf("Reading: %v, From: %v\n", file, node)
+	log.Printf("Reading: %v, From: %v\n", file, node)
 	return nodeClient.Read(context.Background(), file)
 }
 
@@ -307,28 +305,27 @@ func (n *node) read(file *pb.File) (*pb.File, error) {
 }
 
 func (n *node) myFile(id uint64) bool {
-  if n.this.Id < n.predecessor.Id {
-    thisId := n.this.Id + n.predecessor.Id
-    newId := id + n.predecessor.Id
-    if id > n.predecessor.Id {
-      if id < thisId {
-        return true
-      }
-      return false
-    }
-    if id < n.this.Id {
-      if newId > n.predecessor.Id {
-        return true
-      }
-      return false
-    }
-  }
+	if n.this.Id < n.predecessor.Id {
+		thisId := n.this.Id + n.predecessor.Id
+		newId := id + n.predecessor.Id
+		if id > n.predecessor.Id {
+			if id < thisId {
+				return true
+			}
+			return false
+		}
+		if id < n.this.Id {
+			if newId > n.predecessor.Id {
+				return true
+			}
+			return false
+		}
+	}
 	if id <= n.this.Id && id > n.predecessor.Id {
 		return true
 	}
 	return false
 }
-
 
 func (n *node) Join(ip string, port string) error {
 	// connect to supernode
@@ -347,11 +344,11 @@ func (n *node) Join(ip string, port string) error {
 		time.Sleep(1 * time.Second)
 		nodes, err = s.Join(context.Background(), n.this)
 	}
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 
-  // find my own node
+	// find my own node
 	err = n.findMyNode(nodes)
 	if err != nil {
 		return err

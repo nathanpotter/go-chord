@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/nathanpotter/go-chord/node/node"
-	"google.golang.org/grpc"
 	npb "github.com/nathanpotter/go-chord/protos/node"
+	"google.golang.org/grpc"
 )
 
 var (

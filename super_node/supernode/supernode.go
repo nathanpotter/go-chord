@@ -29,10 +29,10 @@ const (
 )
 
 var (
-	NoNodesError   = errors.New("There are no nodes in the system currently")
-	BusyError      = errors.New("Busy connecting a node to the system")
-	WrongNodeError = errors.New("Incorrect node calling PostJoin")
-	NilNodeError   = errors.New("Invalid formatting, Nil node values")
+	NoNodesError    = errors.New("There are no nodes in the system currently")
+	BusyError       = errors.New("Busy connecting a node to the system")
+	WrongNodeError  = errors.New("Incorrect node calling PostJoin")
+	NilNodeError    = errors.New("Invalid formatting, Nil node values")
 	SystemFullError = errors.New("System is full, unable to join")
 )
 
@@ -95,7 +95,6 @@ func (s *Supernode) Join(ctx context.Context, node *pb.Node) (*pb.Nodes, error) 
 			log.Println("Node is now unique")
 		}
 	}
-
 
 	s.nodes.Nodes = append(s.nodes.Nodes, node)
 	s.busyWith = node
