@@ -212,7 +212,7 @@ func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
 
 	// if file is mine, write and return result
 	if n.myFile(id) {
-		log.Printf("Writing file to local filesystem: %v\n", file)
+		log.Printf("Writing file to local filesystem: %s\n", file.Name)
 		return n.write(file)
 	}
 
@@ -229,7 +229,7 @@ func (n *node) Write(ctx context.Context, file *pb.File) (*pb.Empty, error) {
 	}
 	defer conn.Close()
 	nodeClient := npb.NewNodeClient(conn)
-	log.Printf("Writing: %v, To: %v\n", file, node)
+	log.Printf("Writing: %s, To: %v\n", file.Name, node)
 	return nodeClient.Write(context.Background(), file)
 }
 
@@ -267,7 +267,7 @@ func (n *node) Read(ctx context.Context, file *pb.File) (*pb.File, error) {
 
 	// if file is mine, read and return result
 	if n.myFile(id) {
-		log.Printf("Reading file from local filesystem: %v\n", file)
+		log.Printf("Reading file from local filesystem: %s\n", file.Name)
 		return n.read(file)
 	}
 
@@ -285,7 +285,7 @@ func (n *node) Read(ctx context.Context, file *pb.File) (*pb.File, error) {
 	defer conn.Close()
 	nodeClient := npb.NewNodeClient(conn)
 
-	log.Printf("Reading: %v, From: %v\n", file, node)
+	log.Printf("Reading: %s, From: %v\n", file.Name, node)
 	return nodeClient.Read(context.Background(), file)
 }
 

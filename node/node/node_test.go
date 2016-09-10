@@ -275,4 +275,15 @@ func TestUpdateFingers(t *testing.T) {
 		t.Errorf("Should receive error when calling updateFingers with empty nodes")
 	}
 
+	err = n.updateFingers(nodes)
+	if err != nil {
+		t.Errorf("Should not receive error when calling updateFingers with valid input")
+	}
+	if !proto.Equal(n.fingers[1], nodes.Nodes[2]) {
+		t.Errorf("Finger table not built correctly %v, should be %v", n.fingers[1], nodes.Nodes[2])
+	}
+	if !proto.Equal(n.fingers[4], nodes.Nodes[4]) {
+		t.Errorf("Finger table not built correctly %v, should be %v", n.fingers[4], nodes.Nodes[4])
+	}
+
 }

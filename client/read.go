@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -37,43 +35,39 @@ func main() {
 
 	filename := os.Args[1]
 
-	err := write(filename)
+	contents, err := read(filename)
 	if err != nil {
-		fmt.Errorf("Error writing file:", err)
+		fmt.Println(err)
 		os.Exit(-1)
 	}
-	fmt.Printf("Success writing file: %s\n", filename)
+	fmt.Printf("Filename: %s\n", filename)
+	fmt.Printf("Contents: %v\n", string(contents))
 
 }
 
-func write(filename string) error {
-
-	contents, err := getContents(filename)
-	if err != nil {
-		return err
-	}
+func read(filename string) ([]byte, error) {
 
 	node, err := getNode()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	conn, err := grpc.Dial((node.Ip + node.Port), grpc.WithInsecure())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer conn.Close()
 
 	n := npb.NewNodeClient(conn)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = n.Write(context.Background(), &pb.File{Name: filename, Contents: contents})
+	file, err := n.Read(context.Background(), &pb.File{Name: filename})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return file.Contents, nil
 }
 
 func getNode() (*pb.Node, error) {
@@ -94,15 +88,4 @@ func getNode() (*pb.Node, error) {
 		node, err = s.GetNode(context.Background(), &pb.Empty{})
 	}
 	return node, err
-}
-
-func getContents(filename string) ([]byte, error) {
-
-	path := filepath.Join(baseDir, filename)
-
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return contents, nil
 }
